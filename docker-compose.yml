@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    user: root
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - docker
+    networks:
+      - ci-network
+
+  sonarqube:
+    image: sonarqube:lts
+    ports:
+      - "9000:9000"
+    networks:
+      - ci-network
+
+  gitea:
+    image: gitea/gitea:latest
+    ports:
+      - "3000:3000"
+      - "222:22"
+    volumes:
+      - gitea_data:/data
+    networks:
+      - ci-network
+
+  docker:
+    image: docker:dind
+    privileged: true
+    volumes:
+      - docker_data:/var/lib/docker
+    networks:
+      - ci-network
+
+volumes:
+  jenkins_home:
+  gitea_data:
+  docker_data:
+
+networks:
+  ci-network:
+
